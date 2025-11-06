@@ -31,6 +31,26 @@ clicker = AutoClicker(delay=delay, button=button)
 clicker.start()
 
 
+class MacroReader(threading.Thread):
+    def __init__(self, toggle_key):
+        super().__init__()
+        self.active = True
+        self.record = {}
+        self.toggle_key = toggle_key
+        pass
+
+    def run(self, key):
+        if key == self.toggle_key:
+            while self.active:
+                pass
+
+    def exit():
+        pass
+
+    def save_config(self):
+        pass
+
+
 def on_press(key):
     print(key)
     if key == end_key:
