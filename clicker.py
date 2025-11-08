@@ -11,14 +11,15 @@ delay = 0.5
 button = p_mouse.Button.left
 start_key = p_keyboard.KeyCode(char='a')
 end_key = p_keyboard.KeyCode(char='b')
+toggle_record_key = p_keyboard.KeyCode(char='r')
 
 
 class AutoClicker(threading.Thread):
-    def __init__(self, delay, button):
+    def __init__(self, delay, config=None):
         super().__init__()
         self.delay = delay
-        self.button = button
-        # self.config = config
+        # self.button = button
+        self.config = config
         self.active = True
         self.mouse = p_mouse.Controller()
 
@@ -36,13 +37,12 @@ class AutoClicker(threading.Thread):
 
 
 class MacroReader(threading.Thread):
-    def __init__(self, toggle_key):
+    def __init__(self):
         super().__init__()
         self.active = True
         self.record_moves = []
         self.record_clicks = []
         self.record_scrolls = []
-        self.toggle_key = toggle_key
         self.listener = p_mouse.Listener(on_move=self.on_move,
                                          on_click=self.on_click,
                                          on_scroll=self.on_scroll)
@@ -56,9 +56,9 @@ class MacroReader(threading.Thread):
             self.record_moves.append({"x": x, "y": y})
 
     def on_click(self, x, y, button, pressed):
-        print(self.record_clicks)
-        if self.active:
+        if self.active and pressed:
             self.record_clicks.append({"x": x, "y": y, "button": button})
+        print(self.record_clicks)
 
     def on_scroll(self, x, y, dx, dy):
         if self.active:
@@ -71,14 +71,18 @@ class MacroReader(threading.Thread):
         pass
 
 
-# def on_press(key):
-#     if key == end_key:
-#         clicker.exit()
-#         return False
+recorder = MacroReader()
 
 
-# with p_keyboard.Listener(on_press=on_press) as listener:
-#     listener.join()
+def on_press(key):
+    macro_record = False
+    if key == toggle_record_key and macro_record:
+        recorder.exit()
+        return False
+    if key == toggle_record_key:
+        macro_record = True
+        recorder.start()
 
-recorder = MacroReader(p_keyboard.KeyCode(char='p'))
-recorder.start()
+
+with p_keyboard.Listener(on_press=on_press) as listener:
+    listener.join()
